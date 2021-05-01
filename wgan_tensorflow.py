@@ -1,5 +1,6 @@
 import tensorflow as tf
-from tensorflow.examples.tutorials.mnist import input_data
+# from tensorflow.examples.tutorials.mnist import input_data
+import cmnist
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -11,7 +12,7 @@ X_dim = 784
 z_dim = 10
 h_dim = 128
 
-mnist = input_data.read_data_sets('../../MNIST_data', one_hot=True)
+mnist = cmnist.read_data_sets('../../MNIST_data', one_hot=True)
 
 
 def plot(samples):
