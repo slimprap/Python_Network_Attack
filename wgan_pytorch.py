@@ -10,9 +10,10 @@ import os
 from torch.autograd import Variable
 import cmnist
 
-#need to process our data set
+#need to process our data set instead
 mnist = cmnist.read_data_sets('../../MNIST_data', one_hot=True)
 
+#parameter values have been changed to match with IDSGAN paper
 mb_size = 64
 z_dim = 9
 X_dim = mnist.train.images.shape[1]
@@ -44,24 +45,25 @@ def reset_grad():
 G_solver = optim.RMSprop(G.parameters(), lr=lr)
 D_solver = optim.RMSprop(D.parameters(), lr=lr)
 
-#need to save parameters of G, D after finishing iteration
 #In IDS.py, need to train IDS beforehand using half of training set and save parameters
+#Other half of training set to be used here, need to save parameters of G, D after finishing iteration-done
 #Here need to load saved parameters of IDS before the loop
 for it in range(epoch):
     for _ in range(5):
         # Sample data
-        z = Variable(torch.randn(mb_size, z_dim))
+
         X, _ = mnist.train.next_batch(mb_size)
         X = Variable(torch.from_numpy(X))
 
         # Dicriminator forward-loss-backward-update
+        z = Variable(torch.randn(mb_size, z_dim))
         G_sample = G(z)
         #classify G_sample and X by IDS here
         #I_sample=IDS(G_sample)
-        #I_real=IDS(X_normal)
+        #I_real=IDS(X_attack)
 
         #Use I_sample and I_real as input for D
-        #D_real_normal=D(I_real)
+        #D_real=D(I_real)
         #D_fake=D(I_sample)
         D_real = D(X)
         D_fake = D(G_sample)
