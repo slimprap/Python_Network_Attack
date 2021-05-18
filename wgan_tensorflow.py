@@ -7,9 +7,9 @@ import matplotlib.gridspec as gridspec
 import os
 
 
-mb_size = 32
-X_dim = 784
-z_dim = 10
+batch_size = 64
+input_dim = 784
+noise_dim = 9
 h_dim = 128
 
 mnist = cmnist.read_data_sets('../../MNIST_data', one_hot=True)
@@ -30,16 +30,14 @@ def plot(samples):
 
     return fig
 
-
 def xavier_init(size):
     in_dim = size[0]
     xavier_stddev = 1. / tf.sqrt(in_dim / 2.)
     return tf.random_normal(shape=size, stddev=xavier_stddev)
 
+X = tf.placeholder(tf.float32, shape=[None, input_dim])
 
-X = tf.placeholder(tf.float32, shape=[None, X_dim])
-
-D_W1 = tf.Variable(xavier_init([X_dim, h_dim]))
+D_W1 = tf.Variable(xavier_init([input_dim, h_dim]))
 D_b1 = tf.Variable(tf.zeros(shape=[h_dim]))
 
 D_W2 = tf.Variable(xavier_init([h_dim, 1]))
@@ -47,14 +45,13 @@ D_b2 = tf.Variable(tf.zeros(shape=[1]))
 
 theta_D = [D_W1, D_W2, D_b1, D_b2]
 
+z = tf.placeholder(tf.float32, shape=[None, noise_dim])
 
-z = tf.placeholder(tf.float32, shape=[None, z_dim])
-
-G_W1 = tf.Variable(xavier_init([z_dim, h_dim]))
+G_W1 = tf.Variable(xavier_init([noise_dim, h_dim]))
 G_b1 = tf.Variable(tf.zeros(shape=[h_dim]))
 
-G_W2 = tf.Variable(xavier_init([h_dim, X_dim]))
-G_b2 = tf.Variable(tf.zeros(shape=[X_dim]))
+G_W2 = tf.Variable(xavier_init([h_dim, input_dim]))
+G_b2 = tf.Variable(tf.zeros(shape=[input_dim]))
 
 theta_G = [G_W1, G_W2, G_b1, G_b2]
 
@@ -98,18 +95,19 @@ if not os.path.exists('out/'):
 
 i = 0
 
-for it in range(1000000):
+#for it in range(1000000):
+for it in range(100):
     for _ in range(5):
-        X_mb, _ = mnist.train.next_batch(mb_size)
+        X_mb, _ = mnist.train.next_batch(batch_size)
 
         _, D_loss_curr, _ = sess.run(
             [D_solver, D_loss, clip_D],
-            feed_dict={X: X_mb, z: sample_z(mb_size, z_dim)}
+            feed_dict={X: X_mb, z: sample_z(batch_size, noise_dim)}
         )
 
     _, G_loss_curr = sess.run(
         [G_solver, G_loss],
-        feed_dict={z: sample_z(mb_size, z_dim)}
+        feed_dict={z: sample_z(batch_size, noise_dim)}
     )
 
     if it % 100 == 0:
@@ -117,7 +115,7 @@ for it in range(1000000):
               .format(it, D_loss_curr, G_loss_curr))
 
         if it % 1000 == 0:
-            samples = sess.run(G_sample, feed_dict={z: sample_z(16, z_dim)})
+            samples = sess.run(G_sample, feed_dict={z: sample_z(16, noise_dim)})
 
             fig = plot(samples)
             plt.savefig('out/{}.png'

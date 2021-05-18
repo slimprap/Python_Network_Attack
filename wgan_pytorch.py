@@ -8,18 +8,20 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import os
 from torch.autograd import Variable
-# from tensorflow.examples.tutorials.mnist import input_data
-import tensorflow_datasets
+import cmnist
 
-mnist = input_data.read_data_sets('../../MNIST_data', one_hot=True)
-mb_size = 32
-z_dim = 10
+#need to process our data set
+mnist = cmnist.read_data_sets('../../MNIST_data', one_hot=True)
+
+mb_size = 64
+z_dim = 9
 X_dim = mnist.train.images.shape[1]
+print(X_dim)
 y_dim = mnist.train.labels.shape[1]
 h_dim = 128
 cnt = 0
 lr = 1e-4
-
+epoch=100
 
 G = torch.nn.Sequential(
     torch.nn.Linear(z_dim, h_dim),
@@ -28,13 +30,11 @@ G = torch.nn.Sequential(
     torch.nn.Sigmoid()
 )
 
-
 D = torch.nn.Sequential(
     torch.nn.Linear(X_dim, h_dim),
     torch.nn.ReLU(),
     torch.nn.Linear(h_dim, 1),
 )
-
 
 def reset_grad():
     G.zero_grad()
@@ -44,8 +44,10 @@ def reset_grad():
 G_solver = optim.RMSprop(G.parameters(), lr=lr)
 D_solver = optim.RMSprop(D.parameters(), lr=lr)
 
-
-for it in range(1000000):
+#need to save parameters of G, D after finishing iteration
+#In IDS.py, need to train IDS beforehand using half of training set and save parameters
+#Here need to load saved parameters of IDS before the loop
+for it in range(epoch):
     for _ in range(5):
         # Sample data
         z = Variable(torch.randn(mb_size, z_dim))
@@ -54,6 +56,13 @@ for it in range(1000000):
 
         # Dicriminator forward-loss-backward-update
         G_sample = G(z)
+        #classify G_sample and X by IDS here
+        #I_sample=IDS(G_sample)
+        #I_real=IDS(X_normal)
+
+        #Use I_sample and I_real as input for D
+        #D_real_normal=D(I_real)
+        #D_fake=D(I_sample)
         D_real = D(X)
         D_fake = D(G_sample)
 
@@ -110,3 +119,6 @@ for it in range(1000000):
         plt.savefig('out/{}.png'.format(str(cnt).zfill(3)), bbox_inches='tight')
         cnt += 1
         plt.close(fig)
+
+torch.save(G, 'G_model.pth')
+torch.save(D, 'D_model.pth')
