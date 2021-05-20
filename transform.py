@@ -5,12 +5,13 @@ from tensorflow.python.framework import dtypes
 
 #Need to find out actual number of classes from data set
 def extract_labels(Data, one_hot=False, num_classes=2):
-    #numpy array
+    #labels can be numpy array
     labels=[]
     if one_hot:
       return dense_to_one_hot(labels, num_classes)
     pass
 
+#Extract feature values and replace any non numerical feature value with numerical value here
 def extract_features(Data):
     pass
 
