@@ -56,21 +56,24 @@ def data_importer(one_hot=False,
                   validation_size=5000):
     TEST_SET = pd.read_csv('data/UNSW_NB15_testing-set.csv')
     TRAIN_SET = pd.read_csv('data/UNSW_NB15_training-set.csv')
+    #print(TRAIN_SET.head())
     dtype = dtypes.float32
     df = pd.DataFrame(np.random.randn(len(TRAIN_SET), 2))
     mask = np.random.rand(len(df)) < 0.8
 
     ACTUAL_TRAIN_SET = TRAIN_SET[mask]
+    #print(ACTUAL_TRAIN_SET.head())
     VALIDATION_SET = TRAIN_SET[~mask]
 
-    train_samples = extract_features(ACTUAL_TRAIN_SET)
     train_labels = extract_labels(ACTUAL_TRAIN_SET, one_hot=one_hot)
+    train_samples = extract_features(ACTUAL_TRAIN_SET)
+    #print(train_samples.head())
 
-    test_samples = extract_features(TEST_SET)
     test_labels = extract_labels(TEST_SET, one_hot=one_hot)
+    test_samples = extract_features(TEST_SET)
 
-    validation_samples = extract_features(VALIDATION_SET)
     validation_labels = extract_labels(VALIDATION_SET, one_hot=one_hot)
+    validation_samples = extract_features(VALIDATION_SET)
 
     train = DataSet(train_samples, train_labels, dtype=dtype)
     validation = DataSet(validation_samples,

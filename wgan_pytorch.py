@@ -9,13 +9,15 @@ import matplotlib.gridspec as gridspec
 import os
 from torch.autograd import Variable
 import cmnist
+import transform
 
 #need to process our data set instead
 mnist = cmnist.read_data_sets('../../MNIST_data', one_hot=True)
-
+#mnist = transform.data_importer(one_hot=True)
 #parameter values have been changed to match with IDSGAN paper
 mb_size = 64
 z_dim = 9
+#X_dim = mnist.train.samples.shape[1]
 X_dim = mnist.train.images.shape[1]
 print(X_dim)
 y_dim = mnist.train.labels.shape[1]
@@ -53,6 +55,7 @@ for it in range(epoch):
         # Sample data
 
         X, _ = mnist.train.next_batch(mb_size)
+        #X = Variable(torch.from_numpy(X.values))
         X = Variable(torch.from_numpy(X))
 
         # Dicriminator forward-loss-backward-update
@@ -82,6 +85,7 @@ for it in range(epoch):
 
     # Generator forward-loss-backward-update
     X, _ = mnist.train.next_batch(mb_size)
+    #X = Variable(torch.from_numpy(X.values))
     X = Variable(torch.from_numpy(X))
     z = Variable(torch.randn(mb_size, z_dim))
 
@@ -107,20 +111,20 @@ for it in range(epoch):
         gs = gridspec.GridSpec(4, 4)
         gs.update(wspace=0.05, hspace=0.05)
 
-        for i, sample in enumerate(samples):
-            ax = plt.subplot(gs[i])
-            plt.axis('off')
-            ax.set_xticklabels([])
-            ax.set_yticklabels([])
-            ax.set_aspect('equal')
-            plt.imshow(sample.reshape(28, 28), cmap='Greys_r')
+        #for i, sample in enumerate(samples):
+            #ax = plt.subplot(gs[i])
+            #plt.axis('off')
+            #ax.set_xticklabels([])
+            #ax.set_yticklabels([])
+            #ax.set_aspect('equal')
+            #plt.imshow(sample.reshape(28, 28), cmap='Greys_r')*/
 
         if not os.path.exists('out/'):
             os.makedirs('out/')
 
-        plt.savefig('out/{}.png'.format(str(cnt).zfill(3)), bbox_inches='tight')
+        #plt.savefig('out/{}.png'.format(str(cnt).zfill(3)), bbox_inches='tight')
         cnt += 1
-        plt.close(fig)
+        #plt.close(fig)
 
 torch.save(G, 'G_model.pth')
 torch.save(D, 'D_model.pth')
