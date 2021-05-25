@@ -19,8 +19,9 @@ mb_size = 64
 z_dim = 9
 #X_dim = mnist.train.samples.shape[1]
 X_dim = mnist.train.images.shape[1]
-print(X_dim)
+print("X_dim:",X_dim)
 y_dim = mnist.train.labels.shape[1]
+print("y_dim:",y_dim)
 h_dim = 128
 cnt = 0
 lr = 1e-4
@@ -101,7 +102,7 @@ for it in range(epoch):
     reset_grad()
 
     # Print and plot every now and then
-    if it % 1000 == 0:
+    if it % 10 == 0:
         print('Iter-{}; D_loss: {}; G_loss: {}'
               .format(it, D_loss.data.numpy(), G_loss.data.numpy()))
 

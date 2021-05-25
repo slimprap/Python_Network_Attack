@@ -40,6 +40,7 @@ def extract_features(data):
     state_unique = data['state'].unique()
     attack_unique = data['attack_cat'].unique()
     data.pop('label')
+    data.pop('id')
     for i in range(len(proto_unique)):
         data = data.replace(proto_unique[i], i)
     for i in range(len(service_unique)):
@@ -67,7 +68,7 @@ def data_importer(one_hot=False,
 
     train_labels = extract_labels(ACTUAL_TRAIN_SET, one_hot=one_hot)
     train_samples = extract_features(ACTUAL_TRAIN_SET)
-    #print(train_samples.head())
+    print(train_samples.head())
 
     test_labels = extract_labels(TEST_SET, one_hot=one_hot)
     test_samples = extract_features(TEST_SET)
