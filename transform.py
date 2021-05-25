@@ -4,6 +4,29 @@ from tensorflow.contrib.learn.python.learn.datasets import base
 from tensorflow.python.framework import dtypes
 
 
+# function  for Data pre-processing method according to IDS
+
+def prepare_feature(data):
+    #import pandas as pd
+    #import numpy as np
+    #data = pd.read_csv('data/UNSW_NB15_training-set.csv')
+    max_feature = dict()
+    min_feature = dict()
+    # can change in exception if you don't want this process on any feature
+    exception = ['label', 'proto', 'service', 'state', 'attack_cat']
+    for col in data.columns:
+        max_feature[col] = data[col].max()
+        min_feature[col] = data[col].min()
+
+    for col in data.columns:
+        if col in exception:
+            continue
+        data[col] = data[col] - min_feature[col]
+        data[col] = data[col] / (max_feature[col] - min_feature[col])
+
+    return data
+
+
 # Need to find out actual number of classes from data set
 
 def extract_labels(data, one_hot=False, num_classes=2):
@@ -57,18 +80,19 @@ def data_importer(one_hot=False,
                   validation_size=5000):
     TEST_SET = pd.read_csv('data/UNSW_NB15_testing-set.csv')
     TRAIN_SET = pd.read_csv('data/UNSW_NB15_training-set.csv')
-    #print(TRAIN_SET.head())
+    # print(TRAIN_SET.head())
     dtype = dtypes.float32
     df = pd.DataFrame(np.random.randn(len(TRAIN_SET), 2))
     mask = np.random.rand(len(df)) < 0.8
 
     ACTUAL_TRAIN_SET = TRAIN_SET[mask]
-    #print(ACTUAL_TRAIN_SET.head())
+    # print(ACTUAL_TRAIN_SET.head())
     VALIDATION_SET = TRAIN_SET[~mask]
 
     train_labels = extract_labels(ACTUAL_TRAIN_SET, one_hot=one_hot)
     train_samples = extract_features(ACTUAL_TRAIN_SET)
     print(train_samples.head())
+    # print(train_samples.head())
 
     test_labels = extract_labels(TEST_SET, one_hot=one_hot)
     test_samples = extract_features(TEST_SET)
