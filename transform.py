@@ -91,7 +91,6 @@ def data_importer(one_hot=False,
 
     train_labels = extract_labels(ACTUAL_TRAIN_SET, one_hot=one_hot)
     train_samples = extract_features(ACTUAL_TRAIN_SET)
-    print(train_samples.head())
     # print(train_samples.head())
 
     test_labels = extract_labels(TEST_SET, one_hot=one_hot)

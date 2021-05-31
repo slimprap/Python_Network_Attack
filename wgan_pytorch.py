@@ -12,13 +12,13 @@ import cmnist
 import transform
 
 #need to process our data set instead
-mnist = cmnist.read_data_sets('../../MNIST_data', one_hot=True)
-#mnist = transform.data_importer(one_hot=True)
+#mnist = cmnist.read_data_sets('../../MNIST_data', one_hot=True)
+mnist = transform.data_importer(one_hot=True)
 #parameter values have been changed to match with IDSGAN paper
 mb_size = 64
 z_dim = 9
-#X_dim = mnist.train.samples.shape[1]
-X_dim = mnist.train.images.shape[1]
+X_dim = mnist.train.samples.shape[1]
+#X_dim = mnist.train.images.shape[1]
 print("X_dim:",X_dim)
 y_dim = mnist.train.labels.shape[1]
 print("y_dim:",y_dim)
@@ -56,8 +56,8 @@ for it in range(epoch):
         # Sample data
 
         X, _ = mnist.train.next_batch(mb_size)
-        #X = Variable(torch.from_numpy(X.values))
-        X = Variable(torch.from_numpy(X))
+        X = Variable(torch.from_numpy(X.values))
+        #X = Variable(torch.from_numpy(X))
 
         # Dicriminator forward-loss-backward-update
         z = Variable(torch.randn(mb_size, z_dim))
@@ -86,8 +86,8 @@ for it in range(epoch):
 
     # Generator forward-loss-backward-update
     X, _ = mnist.train.next_batch(mb_size)
-    #X = Variable(torch.from_numpy(X.values))
-    X = Variable(torch.from_numpy(X))
+    X = Variable(torch.from_numpy(X.values))
+    #X = Variable(torch.from_numpy(X))
     z = Variable(torch.randn(mb_size, z_dim))
 
     G_sample = G(z)
