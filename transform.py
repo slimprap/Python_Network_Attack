@@ -2,14 +2,10 @@ import pandas as pd
 import numpy as np
 from tensorflow.contrib.learn.python.learn.datasets import base
 from tensorflow.python.framework import dtypes
-from keras.utils import to_categorical
-
+from random import shuffle
 
 # function  for Data pre-processing method according to IDS
-
 def prepare_feature(data):
-    #import pandas as pd
-    #import numpy as np
     #data = pd.read_csv('data/UNSW_NB15_training-set.csv')
     max_feature = dict()
     min_feature = dict()
@@ -29,7 +25,6 @@ def prepare_feature(data):
 
 
 # Need to find out actual number of classes from data set
-
 def extract_labels(data, one_hot=False, num_classes=2):
     # label from label column of Data
     labels = data['label'].to_numpy()
@@ -37,7 +32,6 @@ def extract_labels(data, one_hot=False, num_classes=2):
         # labels = to_categorical(labels)
          return dense_to_one_hot(labels, num_classes)
     return labels
-
 
 # Extract feature + label values and replace any non numerical feature value with numerical value with split attack_cat
 def extract_features_attack(data):
@@ -77,11 +71,16 @@ def extract_features(data):
     return data
 
 
-def data_importer(one_hot=False,
+def data_importer_GAN(one_hot=False,
                   dtype=dtypes.float32,
                   validation_size=5000):
     TEST_SET = pd.read_csv('data/UNSW_NB15_testing-set.csv')
     TRAIN_SET = pd.read_csv('data/UNSW_NB15_training-set.csv')
+    total_sample = TRAIN_SET.shape[0]
+    print("total_sample", total_sample)
+    trainStart = total_sample // 2
+    TRAIN_SET = TRAIN_SET.iloc[:trainStart, :]
+    print("GAN train sample", TRAIN_SET.shape)
     # print(TRAIN_SET.head())
     dtype = dtypes.float32
     df = pd.DataFrame(np.random.randn(len(TRAIN_SET), 2))
@@ -108,7 +107,41 @@ def data_importer(one_hot=False,
     test = DataSet(test_samples, test_labels, dtype=dtype)
 
     return base.Datasets(train=train, validation=validation, test=test)
+    # return base.Datasets(train=train, validation=validation)
 
+def data_importer_IDS():
+    TEST_SET = pd.read_csv('data/UNSW_NB15_testing-set.csv')
+    TRAIN_SET = pd.read_csv('data/UNSW_NB15_training-set.csv')
+    total_sample=TRAIN_SET.shape[0]
+    print("total_sample", total_sample)
+    trainStart=total_sample//2
+    TRAIN_SET=TRAIN_SET.iloc[trainStart:,:]
+    print("IDS train sample", TRAIN_SET.shape)
+    # print(TRAIN_SET.head())
+    dtype = dtypes.float32
+    df = pd.DataFrame(np.random.randn(len(TRAIN_SET), 2))
+    mask = np.random.rand(len(df)) < 0.8
+
+    ACTUAL_TRAIN_SET = TRAIN_SET[mask]
+    # print(ACTUAL_TRAIN_SET.head())
+    VALIDATION_SET = TRAIN_SET[~mask]
+
+    train_labels = extract_labels(ACTUAL_TRAIN_SET)
+    train_samples = extract_features(ACTUAL_TRAIN_SET)
+    # print(train_labels.head())
+
+    validation_labels = extract_labels(VALIDATION_SET)
+    validation_samples = extract_features(VALIDATION_SET)
+
+    test_labels = extract_labels(TEST_SET)
+    test_samples = extract_features(TEST_SET)
+
+    train = DataSet(train_samples, train_labels, dtype=dtype)
+    validation = DataSet(validation_samples,
+                         validation_labels,
+                         dtype=dtype)
+    test = DataSet(test_samples, test_labels, dtype=dtype)
+    return base.Datasets(train=train, validation=validation, test=test)
 
 def dense_to_one_hot(labels_dense, num_classes):
     """Convert class labels from scalars to one-hot vectors."""
@@ -117,7 +150,6 @@ def dense_to_one_hot(labels_dense, num_classes):
     labels_one_hot = np.zeros((num_labels, num_classes))
     labels_one_hot.flat[index_offset + labels_dense.ravel()] = 1
     return labels_one_hot
-
 
 class DataSet(object):
 
@@ -139,7 +171,7 @@ class DataSet(object):
         assert samples.shape[0] == labels.shape[0], (
                 'samples.shape: %s labels.shape: %s' % (samples.shape, labels.shape))
         self._num_examples = samples.shape[0]
-
+        print("self._num_examples", self._num_examples)
         if dtype == dtypes.float32:
             # Convert from [0, 255] -> [0.0, 1.0].
             samples = samples.astype(np.float32)
@@ -173,10 +205,12 @@ class DataSet(object):
             # Finished epoch
             self._epochs_completed += 1
             # Shuffle the data
-            perm = np.arange(self._num_examples)
-            np.random.shuffle(perm)
-            self._samples = self._samples[perm]
-            self._labels = self._labels[perm]
+            # perm = np.arange(self._num_examples)
+            # np.random.shuffle(perm)
+            # sample_shape=self._samples.shape
+            # self._samples = self._samples[perm]
+            # label_shape = self._labels.shape
+            # self._labels = self._labels[perm]
             # Start next epoch
             start = 0
             self._index_in_epoch = batch_size

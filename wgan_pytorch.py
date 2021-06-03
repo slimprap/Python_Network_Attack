@@ -10,18 +10,21 @@ import os
 from torch.autograd import Variable
 import cmnist
 import transform
+from keras.models import Sequential
+from keras.layers import Dense, Dropout, Activation, LSTM
+from keras.layers import Conv1D, MaxPooling1D
 
 #need to process our data set instead
 #mnist = cmnist.read_data_sets('../../MNIST_data', one_hot=True)
-mnist = transform.data_importer(one_hot=True)
+mnist = transform.data_importer_GAN(one_hot=True)
 #parameter values have been changed to match with IDSGAN paper
 mb_size = 64
 z_dim = 9
 X_dim = mnist.train.samples.shape[1]
 #X_dim = mnist.train.images.shape[1]
-print("X_dim:",X_dim)
+
 y_dim = mnist.train.labels.shape[1]
-print("y_dim:",y_dim)
+
 h_dim = 128
 cnt = 0
 lr = 1e-4
@@ -30,6 +33,12 @@ epoch=100
 G = torch.nn.Sequential(
     torch.nn.Linear(z_dim, h_dim),
     torch.nn.ReLU(),
+    # torch.nn.Linear(h_dim, X_dim),
+    # torch.nn.ReLU(),
+    # torch.nn.Linear(h_dim, X_dim),
+    # torch.nn.ReLU(),
+    # torch.nn.Linear(h_dim, X_dim),
+    # torch.nn.ReLU(),
     torch.nn.Linear(h_dim, X_dim),
     torch.nn.Sigmoid()
 )
@@ -51,6 +60,18 @@ D_solver = optim.RMSprop(D.parameters(), lr=lr)
 #In IDS.py, need to train IDS beforehand using half of training set and save parameters
 #Other half of training set to be used here, need to save parameters of G, D after finishing iteration-done
 #Here need to load saved parameters of IDS before the loop
+# train_data= mnist.train.samples.values.reshape(mnist.train.samples.shape[0], mnist.train.samples.shape[1], 1)
+# IDS=Sequential()
+# IDS.add(Conv1D(32, 3, input_shape=train_data.shape[1:]))
+# IDS.add(Activation('relu'))
+# IDS.add(Conv1D(64, 3))
+# IDS.add(Activation('relu'))
+# IDS.add(MaxPooling1D(pool_size=2))
+# IDS.add(LSTM(70, dropout=0.1))
+# IDS.add(Dropout(0.1))
+# IDS.add(Dense(70))
+# IDS.add(Activation('softmax'))
+# IDS.load_weights("models/ids/weight.h5")
 for it in range(epoch):
     for _ in range(5):
         # Sample data
@@ -62,13 +83,18 @@ for it in range(epoch):
         # Dicriminator forward-loss-backward-update
         z = Variable(torch.randn(mb_size, z_dim))
         G_sample = G(z)
+        # G_sample = G_sample.detach().numpy()
+        # sample_data = G_sample.reshape(G_sample.shape[0], G_sample.shape[1], 1)
+        # X_data = X.reshape(X.shape[0], X.shape[1], 1)
+        # X_data = X_data.detach().numpy()
         #classify G_sample and X by IDS here
-        #I_sample=IDS(G_sample)
-        #I_real=IDS(X_attack)
-
+        # I_sample=IDS.predict(sample_data,batch_size=mb_size)
+        # I_sample = Variable(torch.from_numpy(I_sample))
+        # I_real=IDS.predict(X_data,batch_size=mb_size)
+        # I_real = Variable(torch.from_numpy(I_real))
         #Use I_sample and I_real as input for D
-        #D_real=D(I_real)
-        #D_fake=D(I_sample)
+        # D_real=D(I_real)
+        # D_fake=D(I_sample)
         D_real = D(X)
         D_fake = D(G_sample)
 
@@ -106,11 +132,11 @@ for it in range(epoch):
         print('Iter-{}; D_loss: {}; G_loss: {}'
               .format(it, D_loss.data.numpy(), G_loss.data.numpy()))
 
-        samples = G(z).data.numpy()[:16]
-
-        fig = plt.figure(figsize=(4, 4))
-        gs = gridspec.GridSpec(4, 4)
-        gs.update(wspace=0.05, hspace=0.05)
+        # samples = G(z).data.numpy()[:16]
+        #
+        # fig = plt.figure(figsize=(4, 4))
+        # gs = gridspec.GridSpec(4, 4)
+        # gs.update(wspace=0.05, hspace=0.05)
 
         #for i, sample in enumerate(samples):
             #ax = plt.subplot(gs[i])

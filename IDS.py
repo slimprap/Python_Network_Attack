@@ -2,15 +2,15 @@
 import transform
 import numpy as np
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation, Flatten, LSTM
+from keras.layers import Dense, Dropout, Activation, LSTM
 from keras.layers import Conv1D, MaxPooling1D
 from keras.optimizers import SGD
 import tensorflow.compat.v1 as tf
 import os
 import torch
 
-mnist = transform.data_importer(one_hot=False)
-def train(data, file_name, params, num_epochs=50, batch_size=128, train_temp=1, init=None):
+mnist = transform.data_importer_IDS()
+def train(data, file_name, num_epochs=50, batch_size=128):
     """
     Standard neural network training procedure.
     """
@@ -18,18 +18,18 @@ def train(data, file_name, params, num_epochs=50, batch_size=128, train_temp=1, 
 
     train_data= data.train.samples.values.reshape(data.train.samples.shape[0], data.train.samples.shape[1], 1)
     validation_data = data.validation.samples.values.reshape(data.validation.samples.shape[0], data.validation.samples.shape[1], 1)
-    #print(train_data.shape)
+    print(train_data.shape)
     #print(train_data.shape[1:])
     print(data.train.labels[0:5])
 
-    model.add(Conv1D(params[0], 3,input_shape=train_data.shape[1:]))
+    model.add(Conv1D(32, 3,input_shape=train_data.shape[1:]))
     model.add(Activation('relu'))
-    model.add(Conv1D(params[1], 3))
+    model.add(Conv1D(64, 3))
     model.add(Activation('relu'))
     model.add(MaxPooling1D(pool_size=2))
-    model.add(LSTM(params[2], dropout=0.1))
+    model.add(LSTM(70, dropout=0.1))
     model.add(Dropout(0.1))
-    model.add(Dense(params[3]))
+    model.add(Dense(70))
     model.add(Activation('softmax'))
 
     # def fn(correct, predicted):
@@ -37,13 +37,17 @@ def train(data, file_name, params, num_epochs=50, batch_size=128, train_temp=1, 
     #                                                    logits=predicted / train_temp)
     #
     # sgd = SGD(lr=0.005, decay=1e-6, momentum=0.9, nesterov=True)
-
+    #
     # model.compile(loss=fn,
     #               optimizer=sgd,
     #               metrics=['accuracy'])
     model.compile(loss='sparse_categorical_crossentropy',
                   optimizer="adam",
                   metrics=['accuracy'])
+
+    # model.compile(loss='binary_crossentropy',
+    #               optimizer="adam",
+    #               metrics=['accuracy'])
 
     # model.fit(xtrain, ytrain, batch_size=16, epochs=100, verbose=0)
     model.fit(train_data, data.train.labels,
@@ -60,4 +64,4 @@ def train(data, file_name, params, num_epochs=50, batch_size=128, train_temp=1, 
 
     return model
 
-train(mnist, "models/ids", [32, 64, 70, 70], num_epochs=50)
+train(mnist, "models/ids", num_epochs=50)
