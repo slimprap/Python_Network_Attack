@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from tensorflow.contrib.learn.python.learn.datasets import base
 from tensorflow.python.framework import dtypes
+from keras.utils import to_categorical
 
 
 # function  for Data pre-processing method according to IDS
@@ -33,7 +34,8 @@ def extract_labels(data, one_hot=False, num_classes=2):
     # label from label column of Data
     labels = data['label'].to_numpy()
     if one_hot:
-        return dense_to_one_hot(labels, num_classes)
+        # labels = to_categorical(labels)
+         return dense_to_one_hot(labels, num_classes)
     return labels
 
 
@@ -91,7 +93,7 @@ def data_importer(one_hot=False,
 
     train_labels = extract_labels(ACTUAL_TRAIN_SET, one_hot=one_hot)
     train_samples = extract_features(ACTUAL_TRAIN_SET)
-    # print(train_samples.head())
+    # print(train_labels.head())
 
     test_labels = extract_labels(TEST_SET, one_hot=one_hot)
     test_samples = extract_features(TEST_SET)
