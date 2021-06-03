@@ -126,14 +126,14 @@ def data_importer_IDS():
     # print(ACTUAL_TRAIN_SET.head())
     VALIDATION_SET = TRAIN_SET[~mask]
 
-    train_labels = extract_labels(ACTUAL_TRAIN_SET)
+    train_labels = extract_labels(ACTUAL_TRAIN_SET,one_hot=True)
     train_samples = extract_features(ACTUAL_TRAIN_SET)
     # print(train_labels.head())
 
-    validation_labels = extract_labels(VALIDATION_SET)
+    validation_labels = extract_labels(VALIDATION_SET,one_hot=True)
     validation_samples = extract_features(VALIDATION_SET)
 
-    test_labels = extract_labels(TEST_SET)
+    test_labels = extract_labels(TEST_SET,one_hot=True)
     test_samples = extract_features(TEST_SET)
 
     train = DataSet(train_samples, train_labels, dtype=dtype)

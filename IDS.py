@@ -29,7 +29,7 @@ def train(data, file_name, num_epochs=50, batch_size=128):
     model.add(MaxPooling1D(pool_size=2))
     model.add(LSTM(70, dropout=0.1))
     model.add(Dropout(0.1))
-    model.add(Dense(70))
+    model.add(Dense(2))
     model.add(Activation('softmax'))
 
     # def fn(correct, predicted):
@@ -41,13 +41,13 @@ def train(data, file_name, num_epochs=50, batch_size=128):
     # model.compile(loss=fn,
     #               optimizer=sgd,
     #               metrics=['accuracy'])
-    model.compile(loss='sparse_categorical_crossentropy',
-                  optimizer="adam",
-                  metrics=['accuracy'])
-
-    # model.compile(loss='binary_crossentropy',
+    # model.compile(loss='sparse_categorical_crossentropy',
     #               optimizer="adam",
     #               metrics=['accuracy'])
+
+    model.compile(loss='binary_crossentropy',
+                  optimizer="adam",
+                  metrics=['accuracy'])
 
     # model.fit(xtrain, ytrain, batch_size=16, epochs=100, verbose=0)
     model.fit(train_data, data.train.labels,

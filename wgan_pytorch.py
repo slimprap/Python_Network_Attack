@@ -69,7 +69,7 @@ D_solver = optim.RMSprop(D.parameters(), lr=lr)
 # IDS.add(MaxPooling1D(pool_size=2))
 # IDS.add(LSTM(70, dropout=0.1))
 # IDS.add(Dropout(0.1))
-# IDS.add(Dense(70))
+# IDS.add(Dense(2))
 # IDS.add(Activation('softmax'))
 # IDS.load_weights("models/ids/weight.h5")
 for it in range(epoch):
