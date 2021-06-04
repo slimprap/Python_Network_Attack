@@ -35,7 +35,7 @@ FN = 0
 
 for i in range(result.argmax(axis=1)):
     temp_result = result.argmax(axis=1)[i]
-    temp_test = data.test.labels[i]
+    temp_test = data.test.labels[i][1]
     if temp_result == temp_test:
         if temp_result == 0:
             TP = TP + 1
