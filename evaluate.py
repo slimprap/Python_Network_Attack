@@ -32,9 +32,10 @@ TP = 0
 TN = 0
 FP = 0
 FN = 0
-
-for i in range(result.argmax(axis=1)):
-    temp_result = result.argmax(axis=1)[i]
+classResult=result.argmax(axis=1)
+numTestSample=classResult.shape[0]
+for i in range(numTestSample):
+    temp_result = classResult[i]
     temp_test = data.test.labels[i][1]
     if temp_result == temp_test:
         if temp_result == 0:
