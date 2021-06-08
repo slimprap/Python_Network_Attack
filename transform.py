@@ -61,7 +61,7 @@ def extract_features_attack(data):
         data = data.replace(attack_unique[i], i)
     data_normal = data[data['attack_cat'] == 0]
     data_attack = data[data['attack_cat'] != 0]
-    return data_normal, data_attack
+    return data, data_normal, data_attack
 # Extract feature values and replace any non numerical feature value with numerical value here
 def extract_features(data):
     proto_unique = data['proto'].unique()
@@ -80,66 +80,27 @@ def extract_features(data):
         data = data.replace(attack_unique[i], i)
     return data
 
-def extract_labels_multi(data, one_hot=False, num_classes=2):
+def extract_labels_multi(data, one_hot=False, num_classes=10):
     # label from label column of Data
-    labels = data['label'].to_numpy()
+    labels = data['attack_cat'].to_numpy()
     if one_hot:
         # labels = to_categorical(labels)
          return dense_to_one_hot(labels, num_classes)
+    data.pop('attack_cat')
     return labels
-def extract_labels_attack_multi(data, one_hot=False, num_classes=2):
+def extract_labels_attack_multi(data, one_hot=False, num_classes=10):
     # label from label column of Data
-    labels = data['label'].to_numpy()
+    labels = data['attack_cat'].to_numpy()
     label_normal=labels[labels==0]
     label_attack = labels[labels != 0]
     if one_hot:
         # labels = to_categorical(labels)
         label_normal=dense_to_one_hot(label_normal, num_classes)
         label_attack = dense_to_one_hot(label_attack, num_classes)
+    data.pop('attack_cat')
     return label_normal, label_attack
 
-# Extract feature + label values and replace any non numerical feature value with numerical value with split attack_cat
-def extract_features_attack_multi(data):
-    proto_unique = data['proto'].unique()
-    service_unique = data['service'].unique()
-    state_unique = data['state'].unique()
-    attack_unique = data['attack_cat'].unique()
-    # print("attack_unique", attack_unique)
-    data.pop('label')
-    data.pop('id')
-    for i in range(len(proto_unique)):
-        data = data.replace(proto_unique[i], i)
-    for i in range(len(service_unique)):
-        data = data.replace(service_unique[i], i)
-    for i in range(len(state_unique)):
-        data = data.replace(state_unique[i], i)
-    for i in range(len(attack_unique)):
-        data = data.replace(attack_unique[i], i)
-    data_normal = data[data['attack_cat'] == 0]
-    data_attack = data[data['attack_cat'] != 0]
-    data.pop('attack_cat')
-    return data_normal, data_attack
-# Extract feature values and replace any non numerical feature value with numerical value here
-def extract_features_multi(data):
-    proto_unique = data['proto'].unique()
-    service_unique = data['service'].unique()
-    state_unique = data['state'].unique()
-    attack_unique = data['attack_cat'].unique()
-    data.pop('label')
-    data.pop('id')
-    for i in range(len(proto_unique)):
-        data = data.replace(proto_unique[i], i)
-    for i in range(len(service_unique)):
-        data = data.replace(service_unique[i], i)
-    for i in range(len(state_unique)):
-        data = data.replace(state_unique[i], i)
-    for i in range(len(attack_unique)):
-        data = data.replace(attack_unique[i], i)
-    return data
-
-def data_importer_GAN(one_hot=False,
-                  dtype=dtypes.float32,
-                  validation_size=5000):
+def data_importer_GAN(one_hot=False):
     TRAIN_SET = pd.read_csv('data/UNSW_NB15_testing-set.csv')
     TEST_SET = pd.read_csv('data/UNSW_NB15_training-set.csv')
     total_sample = TRAIN_SET.shape[0]
@@ -194,11 +155,16 @@ def data_importer_IDS(Evaluate=False):
         # print(ACTUAL_TRAIN_SET.head())
         VALIDATION_SET = TRAIN_SET[~mask]
 
-        validation_labels = extract_labels(VALIDATION_SET, one_hot=True)
+        # validation_labels = extract_labels(VALIDATION_SET, one_hot=True)
+        # validation_samples = extract_features(VALIDATION_SET)
+        #
+        # test_labels = extract_labels(TEST_SET, one_hot=True)
+        # test_samples = extract_features(TEST_SET)
         validation_samples = extract_features(VALIDATION_SET)
+        validation_labels = extract_labels_multi(validation_samples, one_hot=True)
 
-        test_labels = extract_labels(TEST_SET, one_hot=True)
         test_samples = extract_features(TEST_SET)
+        test_labels = extract_labels_multi(test_samples, one_hot=True)
 
         validation = DataSet(validation_samples,
                              validation_labels,
@@ -206,15 +172,22 @@ def data_importer_IDS(Evaluate=False):
         test = DataSet(test_samples, test_labels, dtype=dtype)
     else:
         ACTUAL_TRAIN_SET=TRAIN_SET
-        test_labels_normal, test_labels_attack = extract_labels_attack(TEST_SET, one_hot=True)
-        test_samples_normal, test_samples_attack = extract_features_attack(TEST_SET)
+
+        # test_labels_normal, test_labels_attack = extract_labels_attack(TEST_SET, one_hot=True)
+        # test_samples_normal, test_samples_attack = extract_features_attack(TEST_SET)
+
+        test_samples_full, test_samples_normal, test_samples_attack = extract_features_attack(TEST_SET)
+        test_labels_normal, test_labels_attack = extract_labels_attack_multi(test_samples_full, one_hot=True)
         validation = DataSet(test_samples_attack,
                              test_labels_attack,
                              dtype=dtype)
         test = DataSet(test_samples_normal, test_labels_normal, dtype=dtype)
 
-    train_labels = extract_labels(ACTUAL_TRAIN_SET,one_hot=True)
+    # train_labels = extract_labels(ACTUAL_TRAIN_SET, one_hot=True)
+    # train_samples = extract_features(ACTUAL_TRAIN_SET)
+
     train_samples = extract_features(ACTUAL_TRAIN_SET)
+    train_labels = extract_labels_multi(train_samples,one_hot=True)
     # print(train_labels.head())
     train = DataSet(train_samples, train_labels, dtype=dtype)
     return base.Datasets(train=train, validation=validation, test=test)

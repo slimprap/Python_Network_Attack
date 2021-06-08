@@ -23,7 +23,7 @@ IDS.add(Activation('relu'))
 IDS.add(MaxPooling1D(pool_size=2))
 IDS.add(LSTM(70, dropout=0.1))
 IDS.add(Dropout(0.1))
-IDS.add(Dense(2))
+IDS.add(Dense(10))
 IDS.add(Activation('softmax'))
 IDS.load_weights("models/ids/weight.h5")
 
