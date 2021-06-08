@@ -24,8 +24,10 @@ def train(data, file_name, num_epochs=50, batch_size=128):
 
     model.add(Conv1D(32, 3,input_shape=train_data.shape[1:]))
     model.add(Activation('relu'))
+    # model.add(Dropout(0.1))
     model.add(Conv1D(64, 3))
     model.add(Activation('relu'))
+    # model.add(Dropout(0.1))
     model.add(MaxPooling1D(pool_size=2))
     model.add(LSTM(70, dropout=0.1))
     model.add(Dropout(0.1))
