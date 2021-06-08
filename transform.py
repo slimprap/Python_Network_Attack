@@ -64,10 +64,13 @@ def extract_features_attack(data):
     return data, data_normal, data_attack
 # Extract feature values and replace any non numerical feature value with numerical value here
 def extract_features(data):
+    #import pandas as pd
+    #data = pd.read_csv('data/UNSW_NB15_testing-set.csv')
     proto_unique = data['proto'].unique()
     service_unique = data['service'].unique()
     state_unique = data['state'].unique()
-    attack_unique = data['attack_cat'].unique()
+    attack_unique = ['Normal', 'Backdoor', 'Analysis', 'Fuzzers', 'Shellcode', 'Reconnaissance',
+ 'Exploits', 'DoS', 'Worms', 'Generic']
     data.pop('label')
     data.pop('id')
     for i in range(len(proto_unique)):
@@ -78,6 +81,7 @@ def extract_features(data):
         data = data.replace(state_unique[i], i)
     for i in range(len(attack_unique)):
         data = data.replace(attack_unique[i], i)
+    #print(data)
     return data
 
 def extract_labels_multi(data, one_hot=False, num_classes=10):
