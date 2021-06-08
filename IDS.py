@@ -31,7 +31,8 @@ def train(data, file_name, num_epochs=50, batch_size=128):
     model.add(MaxPooling1D(pool_size=2))
     model.add(LSTM(70, dropout=0.1))
     model.add(Dropout(0.1))
-    model.add(Dense(10))
+    # model.add(Dense(10))
+    model.add(Dense(2))
     model.add(Activation('softmax'))
 
     # def fn(correct, predicted):
@@ -66,4 +67,4 @@ def train(data, file_name, num_epochs=50, batch_size=128):
 
     return model
 
-train(mnist, "models/ids", num_epochs=50)
+train(mnist, "models/ids_binary", num_epochs=50)

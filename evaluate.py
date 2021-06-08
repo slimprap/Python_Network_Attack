@@ -24,7 +24,9 @@ IDS.add(MaxPooling1D(pool_size=2))
 IDS.add(LSTM(70, dropout=0.1))
 IDS.add(Dropout(0.1))
 IDS.add(Dense(10))
+# IDS.add(Dense(2))
 IDS.add(Activation('softmax'))
+# IDS.load_weights("models/ids_binary/weight.h5")
 IDS.load_weights("models/ids/weight.h5")
 
 result=IDS.predict(test_data)
@@ -50,17 +52,17 @@ testLabelsAttack=data_partitioned.validation.labels.argmax(axis=1)
 # print("testLabels", testLabels[0:5])
 # print("classResult",classResult[0:5])
 numTestSample=classResult.shape[0]
-print("total test sample", numTestSample)
+# print("total test sample", numTestSample)
 for i in range(numTestSample):
     temp_result = classResult[i]
     temp_test = testLabels[i]
     if temp_result == temp_test:
-        if temp_result == 1:
+        if temp_result != 0:
             TP = TP + 1
         else:
             TN = TN + 1
     else:
-        if temp_result == 1:
+        if temp_result != 0:
             FP = FP + 1
         else:
             FN = FN + 1
@@ -73,8 +75,6 @@ print('Recall: ', recall)
 print('F1: ', 2*(precision*recall)/(precision+recall))
 
 numTestSampleNormal=classResultNormal.shape[0]
-print("test sample normal", numTestSampleNormal)
-print("test sample attack", classResultAttack.shape[0])
 for i in range(numTestSampleNormal):
     temp_result = classResultNormal[i]
     temp_test = testLabelsNormal[i]
@@ -122,12 +122,10 @@ print('Accuracy Attack: ', (TP_ATTACK+TN_ATTACK)/(TP_ATTACK+TN_ATTACK+FP_ATTACK+
 G=torch.load('G_model.pth')
 z = Variable(torch.randn(512,9))
 G_sample = G(z)
-print("G_sample shape:", G_sample.shape)
 G_sample = G_sample.detach().numpy()
 sample_data = G_sample.reshape(G_sample.shape[0], G_sample.shape[1], 1)
 I_sample=IDS.predict(sample_data).argmax(axis=1)
-correct=I_sample[I_sample==1]
+correct=I_sample[I_sample!=0]
 totalG=I_sample.shape[0]
 correctG=correct.shape[0]
-# I_sample=IDS.predict(G_sample)
 print("Accuracy under GAN:", correctG/totalG)

@@ -47,7 +47,8 @@ def extract_features_attack(data):
     proto_unique = data['proto'].unique()
     service_unique = data['service'].unique()
     state_unique = data['state'].unique()
-    attack_unique = data['attack_cat'].unique()
+    attack_unique = ['Normal', 'Backdoor', 'Analysis', 'Fuzzers', 'Shellcode', 'Reconnaissance',
+ 'Exploits', 'DoS', 'Worms', 'Generic']
     # print("attack_unique", attack_unique)
     data.pop('label')
     data.pop('id')
@@ -107,29 +108,12 @@ def extract_labels_attack_multi(data, one_hot=False, num_classes=10):
 def data_importer_GAN(one_hot=False):
     TRAIN_SET = pd.read_csv('data/UNSW_NB15_testing-set.csv')
     TEST_SET = pd.read_csv('data/UNSW_NB15_training-set.csv')
-    total_sample = TRAIN_SET.shape[0]
-    # print("total_sample", total_sample)
-    # trainStart = total_sample // 2
-    # TRAIN_SET = TRAIN_SET.iloc[:trainStart, :]
-    # print("GAN train sample", TRAIN_SET.shape)
-    # print(TRAIN_SET.head())
     dtype = dtypes.float32
-    df = pd.DataFrame(np.random.randn(len(TRAIN_SET), 2))
-    # mask = np.random.rand(len(df)) < 0.8
-
-    # ACTUAL_TRAIN_SET = TRAIN_SET[mask]
     ACTUAL_TRAIN_SET = TRAIN_SET
-    # print(ACTUAL_TRAIN_SET.head())
-    # VALIDATION_SET = TRAIN_SET[~mask]
-
     train_labels = extract_labels(ACTUAL_TRAIN_SET, one_hot=one_hot)
     train_samples = extract_features(ACTUAL_TRAIN_SET)
     test_labels_normal, test_labels_attack = extract_labels_attack(TEST_SET, one_hot=one_hot)
-    test_samples_normal, test_samples_attack = extract_features_attack(TEST_SET)
-    print(test_labels_attack[0:5])
-
-    # test_labels = extract_labels(TEST_SET, one_hot=one_hot)
-    # test_samples = extract_features(TEST_SET)
+    test_samples_full, test_samples_normal, test_samples_attack = extract_features_attack(TEST_SET)
 
     test_normal = DataSet(test_samples_normal, test_labels_normal, dtype=dtype)
     test_attack = DataSet(test_samples_attack,
@@ -138,7 +122,6 @@ def data_importer_GAN(one_hot=False):
     train = DataSet(train_samples, train_labels, dtype=dtype)
 
     return base.Datasets(train=train, validation=test_attack, test=test_normal)
-    # return base.Datasets(train=train, validation=validation)
 
 def data_importer_IDS(Evaluate=False):
     TRAIN_SET = pd.read_csv('data/UNSW_NB15_testing-set.csv')
@@ -146,10 +129,7 @@ def data_importer_IDS(Evaluate=False):
     total_sample=TRAIN_SET.shape[0]
     print("total training sample", total_sample)
     print("total test sample", TEST_SET.shape[0])
-    # trainStart=total_sample//2
-    # TRAIN_SET=TRAIN_SET.iloc[trainStart:,:]
-    # print("IDS train sample", TRAIN_SET.shape)
-    # print(TRAIN_SET.head())
+
     dtype = dtypes.float32
     if Evaluate==False:
         df = pd.DataFrame(np.random.randn(len(TRAIN_SET), 2))
@@ -176,9 +156,11 @@ def data_importer_IDS(Evaluate=False):
         test = DataSet(test_samples, test_labels, dtype=dtype)
     else:
         ACTUAL_TRAIN_SET=TRAIN_SET
+        train_samples_normal = TRAIN_SET[TRAIN_SET['attack_cat']=='Normal']
+        train_samples_attack = TRAIN_SET[TRAIN_SET['attack_cat']!='Normal']
 
         # test_labels_normal, test_labels_attack = extract_labels_attack(TEST_SET, one_hot=True)
-        # test_samples_normal, test_samples_attack = extract_features_attack(TEST_SET)
+        # test_samples_full, test_samples_normal, test_samples_attack = extract_features_attack(TEST_SET)
 
         test_samples_full, test_samples_normal, test_samples_attack = extract_features_attack(TEST_SET)
         test_labels_normal, test_labels_attack = extract_labels_attack_multi(test_samples_full, one_hot=True)
@@ -186,13 +168,16 @@ def data_importer_IDS(Evaluate=False):
                              test_labels_attack,
                              dtype=dtype)
         test = DataSet(test_samples_normal, test_labels_normal, dtype=dtype)
-
+        print("training normal sample", train_samples_normal.shape[0])
+        print("training attack sample", train_samples_attack.shape[0])
+        print("test normal sample", test_samples_normal.shape[0])
+        print("test attack sample", test_samples_attack.shape[0])
     # train_labels = extract_labels(ACTUAL_TRAIN_SET, one_hot=True)
     # train_samples = extract_features(ACTUAL_TRAIN_SET)
 
     train_samples = extract_features(ACTUAL_TRAIN_SET)
     train_labels = extract_labels_multi(train_samples,one_hot=True)
-    # print(train_labels.head())
+
     train = DataSet(train_samples, train_labels, dtype=dtype)
     return base.Datasets(train=train, validation=validation, test=test)
 
